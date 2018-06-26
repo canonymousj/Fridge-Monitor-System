@@ -20,10 +20,11 @@
 #include <DallasTemperature.h>
 #include "Gsender.h"
 
-extern "C" {
-#include "user_interface.h"
-}
-uint32_t free1 = system_get_free_heap_size();
+//ram check
+//extern "C" {
+//#include "user_interface.h"
+//}
+//uint32_t free1 = system_get_free_heap_size();
 
 /*****************************************************************/
 /*                      Definitions section                      */
@@ -67,7 +68,7 @@ const int setBuses[6] = {D1, D2, D3, D5, D6, D7};   // Data wire is plugged into
 
 //loads configurations from eeprom
 creds loaded = loadCreds();
-sensorConfig loadedConfig;
+sensorConfig loadedConfig = loadSensorConfig();
 
 boolean sendEmail = loadSendEmail(); //loads email send state from eeprom
 boolean sendSMS = loadSendSMS(); //loads sms send state from eeprom
@@ -156,8 +157,6 @@ void setup ( void ) {
   sensors[0].begin(); 
   numSensors = (int)sensors[0].getDS18Count();
 
-   Serial.println(free1);
-   
   Serial.print(loadedConfig.numSen);
   Serial.print(loadedConfig.updateRate);
   for(unsigned int i = 0; i < 6; i++){
@@ -181,7 +180,6 @@ void loop ( void ) {
     prevMillis = curMillis;
     authed = 0;
     Serial.println("Authed reset");
-    Serial.println(free1);
   }
 
   //check temp every tempInterval seconds

@@ -322,81 +322,111 @@ void handleConfig() {
     prevMillis = millis();  
   }     
   
-  char temp[5000];
+  char temp[1100];
 
-  snprintf ( temp,5000,
-"<html>\
-  <head>\
-    <title>System Configuration</title>\
-    <style>\
-      body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
-    </style>\
-  </head>\
-  <body>\
-    <h1>System Configuration</h1>\
-    <p>Email send state: %s</p>\
- <a href=\"/togemail\"><button>Toggle Email</button></a>\
-  <p>SMS send state: %s</p>\
-  <a href=\"/togsms\"><button>Toggle SMS</button></a>\
-  <h2>Units configuration</h2>\
-  <form method='POST' action='configsave'>\
-    Enter number of sensor sets used (max 6): <input id = \"setNum\" type=\"number\" min=\"0\" step=\"1\" max = \"6\" value = \"%d\" name=\"setNum\"><br><br>\
-    Enter update rate in minutes (recommended 5min with 6 sets and 4 sensors per set): <input id = \"updateRate\" type=\"number\" min=\"0\" step=\"1\" value = \"%d\" name=\"updateRate\"> min<br><br>\
-    Enter sensor set nickname:<br>\
+    snprintf ( temp,1100,
+    "<html>\
+      <head>\
+        <title>System Configuration</title>\
+        <style>\
+          body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+        </style>\
+      </head>\
+      <body>\
+        <h1>System Configuration</h1>\
+        <p>Email send state: %s</p>\
+     <a href=\"/togemail\"><button>Toggle Email</button></a>\
+      <p>SMS send state: %s</p>\
+      <a href=\"/togsms\"><button>Toggle SMS</button></a>\
+      <h2>Units configuration</h2>\
+      <form method='POST' action='configsave'>\
+        Enter number of sensor sets used (max 6): <input id = \"setNum\" type=\"number\" min=\"0\" step=\"1\" max = \"6\" value = \"%d\" name=\"setNum\"><br><br>\
+        Enter update rate in minutes (recommended 5min with 6 sets and 4 sensors per set): <input id = \"updateRate\" type=\"number\" min=\"0\" step=\"1\" value = \"%d\" name=\"updateRate\"> min<br><br>\
+    ",
+    (sendEmail?"True":"False"), (sendSMS?"True":"False"), loadedConfig.numSen, (loadedConfig.updateRate)/(60000)
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    " Enter sensor set nickname:<br>\
     1: <input id = \"set1Name\" type=\"text\" placeholder = \"%s\" name=\"set1Name\">\
     2: <input id = \"set2Name\" type=\"text\" placeholder = \"%s\" name=\"set2Name\">\
     3: <input id = \"set3Name\" type=\"text\" placeholder = \"%s\" name=\"set3Name\"><br>\
     4: <input id = \"set4Name\" type=\"text\" placeholder = \"%s\" name=\"set4Name\">\
     5: <input id = \"set5Name\" type=\"text\" placeholder = \"%s\" name=\"set5Name\">\
     6: <input id = \"set6Name\" type=\"text\" placeholder = \"%s\" name=\"set6Name\"><br><br>\
-    Enter channel ID's:<br>\
+    ",
+      loadedConfig.senSetName[0], loadedConfig.senSetName[1], loadedConfig.senSetName[2], loadedConfig.senSetName[3], loadedConfig.senSetName[4], loadedConfig.senSetName[5]
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "Enter channel ID's:<br>\
     1: <input id = \"channelID1\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"channelID1\">\
     2: <input id = \"channelID2\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"channelID2\">\
     3: <input id = \"channelID3\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"channelID3\"><br>\
     4: <input id = \"channelID4\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"channelID4\">\
     5: <input id = \"channelID5\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"channelID5\">\
     6: <input id = \"channelID6\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"channelID6\"><br><br>\
-    Enter channel write key's:<br>\
+    ",
+    loadedConfig.channelID[0], loadedConfig.channelID[1], loadedConfig.channelID[2], loadedConfig.channelID[3], loadedConfig.channelID[4], loadedConfig.channelID[5]
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "Enter channel write key's:<br>\
     1: <input id = \"writekey1\" type=\"text\" placeholder = \"%s\" name=\"writekey1\">\
     2: <input id = \"writekey2\" type=\"text\" placeholder = \"%s\" name=\"writekey2\">\
     3: <input id = \"writekey3\" type=\"text\" placeholder = \"%s\" name=\"writekey3\"><br>\
     4: <input id = \"writekey4\" type=\"text\" placeholder = \"%s\" name=\"writekey4\">\
     5: <input id = \"writekey5\" type=\"text\" placeholder = \"%s\" name=\"writekey5\">\
     6: <input id = \"writekey6\" type=\"text\" placeholder = \"%s\" name=\"writekey6\"><br><br>\
-    Enter channel read key's:<br>\
+    ",
+    loadedConfig.writekey[0], loadedConfig.writekey[1], loadedConfig.writekey[2], loadedConfig.writekey[3], loadedConfig.writekey[4], loadedConfig.writekey[5]
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "Enter channel read key's:<br>\
     1: <input id = \"readkey1\" type=\"text\" placeholder = \"%s\" name=\"readkey1\">\
     2: <input id = \"readkey2\" type=\"text\" placeholder = \"%s\" name=\"readkey2\">\
     3: <input id = \"readkey3\" type=\"text\" placeholder = \"%s\" name=\"readkey3\"><br>\
     4: <input id = \"readkey4\" type=\"text\" placeholder = \"%s\" name=\"readkey4\">\
     5: <input id = \"readkey5\" type=\"text\" placeholder = \"%s\" name=\"readkey5\">\
     6: <input id = \"readkey6\" type=\"text\" placeholder = \"%s\" name=\"readkey6\"><br><br>\
-  <h2>Sensor configuration</h2>\
-    Enter number of results: <input id = \"resNum\" type=\"number\" min=\"0\" step=\"1\" value = \"%s\" name=\"resNum\"><br><br>\
-    Enter widget start number:<br>\
-    1: <input id = \"widget1\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget1\">\
-    2: <input id = \"widget2\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget2\">\
-    3: <input id = \"widget3\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget3\"><br>\
-    4: <input id = \"widget4\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget4\">\
-    5: <input id = \"widget5\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget5\">\
-    6: <input id = \"widget6\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget6\"><br><br>\
-    <input type=\"submit\" value=\"Submit\">\
-  </form>\
-  </body>\
-</html>",
-    (sendEmail?"True":"False"), (sendSMS?"True":"False"), loadedConfig.numSen, (loadedConfig.updateRate)/(60000), loadedConfig.senSetName[0], loadedConfig.senSetName[1], loadedConfig.senSetName[2], loadedConfig.senSetName[3], loadedConfig.senSetName[4], loadedConfig.senSetName[5],
-     loadedConfig.channelID[0], loadedConfig.channelID[1], loadedConfig.channelID[2], loadedConfig.channelID[3], loadedConfig.channelID[4], loadedConfig.channelID[5], 
-     loadedConfig.writekey[0], loadedConfig.writekey[1], loadedConfig.writekey[2], loadedConfig.writekey[3], loadedConfig.writekey[4], loadedConfig.writekey[5], 
-     loadedConfig.readkey[0], loadedConfig.readkey[1], loadedConfig.readkey[2], loadedConfig.readkey[3], loadedConfig.readkey[4], loadedConfig.readkey[5], resultNum,
-     loadedConfig.widgetID[0], loadedConfig.widgetID[1], loadedConfig.widgetID[2], loadedConfig.widgetID[3], loadedConfig.widgetID[4], loadedConfig.widgetID[5]
+    ",
+    loadedConfig.readkey[0], loadedConfig.readkey[1], loadedConfig.readkey[2], loadedConfig.readkey[3], loadedConfig.readkey[4], loadedConfig.readkey[5]
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    " <h2>Sensor configuration</h2>\
+      Enter number of results: <input id = \"resNum\" type=\"number\" min=\"0\" step=\"1\" value = \"%s\" name=\"resNum\"><br><br>\
+      Enter widget start number:<br>\
+      1: <input id = \"widget1\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget1\">\
+      2: <input id = \"widget2\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget2\">\
+      3: <input id = \"widget3\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget3\"><br>\
+      4: <input id = \"widget4\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget4\">\
+      5: <input id = \"widget5\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget5\">\
+      6: <input id = \"widget6\" type=\"number\" min=\"0\" step=\"1\" placeholder = \"%d\" name=\"widget6\"><br><br>\
+      <input type=\"submit\" value=\"Submit\">\
+      </form>\
+      </body>\
+    </html>",
+    resultNum, loadedConfig.widgetID[0], loadedConfig.widgetID[1], loadedConfig.widgetID[2], loadedConfig.widgetID[3], loadedConfig.widgetID[4], loadedConfig.widgetID[5]
      
-  );
-  
-   server.send ( 200, "text/html", temp );
-  
+    );
+
+    server.sendContent(temp);
 }
 
-  /**Handle each sets webpage**/
-void handleSet1() { //ram issue
+ /**Handle each sets webpage**/
+void handleSet1() {
   if(!authed){  //server authentication message
     if(!server.authenticate(loaded.www_name, loaded.www_pwd))
         return server.requestAuthentication(DIGEST_AUTH, www_realm, authFailResponse);
@@ -404,22 +434,77 @@ void handleSet1() { //ram issue
     authed = 1;
     prevMillis = millis();  
   }     
-  Serial.println("TP 1");
-  Serial.println(free1);
-  char temp[1000];
-  Serial.println(free1);
-  Serial.println("TP 2");
-  snprintf ( temp,1000,
-"randomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000times\
-randomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000times\
-randomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000times\
-randomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000times\
-randomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000times\
-randomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000timesrandomshit1000times"
-  );
-  Serial.println("TP 3");
-  Serial.println(free1);
-   server.send ( 200, "text/html", temp );
-   Serial.println(free1);
   
+  char temp[1100];
+
+  snprintf ( temp,1100,
+    "<html>\
+        <head>\
+          <title>%s Information:</title>\
+        <style>\
+          body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+        </style>\
+        </head>\
+      <body>\
+        <h1>%s Information View:</h1>\
+        <h2>Temperatures: </h2>\
+        <p>Average sensor temp is: %.2f&deg;C</p>\
+        <p></p>",
+    loadedConfig.senSetName[0], loadedConfig.senSetName[0], avgT[0]
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "<iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
+    <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe><br>\
+    <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
+    <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
+    ",
+     loadedConfig.channelID[0], loadedConfig.widgetID[0], loadedConfig.channelID[0], loadedConfig.widgetID[0] + 1, loadedConfig.channelID[0], loadedConfig.widgetID[0], loadedConfig.channelID[0], loadedConfig.widgetID[0] + 1
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "<h2>History graphs: </h2>\
+      <form method='POST' action='res'>\
+       Enter number of results: <input id = \"resNum\" type=\"number\" min=\"0\" step=\"1\" value = \"%s\" name=\"resNum\"><br>\
+      <input type=\"submit\" value=\"Submit\">\
+      </form>\
+    <p></p>", resultNum     
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "<iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
+  <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe><br>\
+  <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
+  <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
+  ", 
+      loadedConfig.channelID[0], 1, loadedConfig.readkey[0], resultNum, 1,
+      loadedConfig.channelID[0], 2, loadedConfig.readkey[0], resultNum, 2,
+      loadedConfig.channelID[0], 1, loadedConfig.readkey[0], resultNum, 1, 
+      loadedConfig.channelID[0], 2, loadedConfig.readkey[0], resultNum, 2
+    );
+
+    server.sendContent(temp);
+
+    snprintf ( temp,1100,
+    "<h2>Export</h2>\
+      Download all of %s feeds in CSV format.\
+      <br><br>\
+        <form action=\"https://api.thingspeak.com/stream/channels/%d/feeds?api_key=%s&amp;timezone=Africa/Johannesburg\" class=\"button_to\" method=\"post\">\
+          <div>\
+            <input class=\"btn btn-primary\" id=\"download_channel_csv_btn\" type=\"submit\" value=\"Download\" />\
+          </div>\
+        </form>\
+      </body>\
+    </html>", 
+    loadedConfig.senSetName[0], loadedConfig.channelID[0], loadedConfig.writekey[0]   
+    );
+
+    server.sendContent(temp);
+     
 }
