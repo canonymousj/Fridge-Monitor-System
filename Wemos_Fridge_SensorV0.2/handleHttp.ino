@@ -142,20 +142,22 @@ void handleConfigSave() {
   for(unsigned int i = 0; i < 6; i++){
     char temp[12];
     snprintf (temp, 12, "set%dName", i+1);
-   // local_senSetName[i] =  server.arg(temp).c_str();
+    server.arg(temp).toCharArray(local_senSetName[i], sizeof(local_senSetName[i]) - 1);
     
     snprintf (temp, 12, "channelID%d", i+1);
     local_channelID[i] =  atol(server.arg(temp).c_str());
 
     snprintf (temp, 12, "writekey%d", i+1);
-    //local_writekey[i] =  server.arg(temp);
-
+    server.arg(temp).toCharArray(local_writekey[i], sizeof(local_writekey[i]) - 1);
+  
     snprintf (temp, 12, "readkey%d", i+1);
-    //local_readkey[i] =  server.arg(temp);
+    server.arg(temp).toCharArray(local_readkey[i], sizeof(local_readkey[i]) - 1);
 
     snprintf (temp, 12, "widget%d", i+1);
     local_widgetID[i] =  server.arg(temp).toInt();
   }
+
+  server.arg("resNum").toCharArray(resultNum, sizeof(resultNum) - 1);
 
   Serial.print(local_numSen);
   Serial.print(local_updateRate);
@@ -190,7 +192,8 @@ void handleConfigSave() {
   );
   server.send ( 200, "text/html", temp );
 
-  //saveSensorConfig();
+  saveSensorConfig();
+  loadedConfig = loadSensorConfig();
 }
 
 void handleNotFound() {
@@ -434,6 +437,8 @@ void handleSet1() {
     authed = 1;
     prevMillis = millis();  
   }     
+
+  numSensors = (int)sensors[0].getDS18Count();
   
   char temp[1100];
 
@@ -455,17 +460,18 @@ void handleSet1() {
 
     server.sendContent(temp);
 
-    snprintf ( temp,1100,
-    "<iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
-    <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe><br>\
-    <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
-    <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
-    ",
-     loadedConfig.channelID[0], loadedConfig.widgetID[0], loadedConfig.channelID[0], loadedConfig.widgetID[0] + 1, loadedConfig.channelID[0], loadedConfig.widgetID[0], loadedConfig.channelID[0], loadedConfig.widgetID[0] + 1
-    );
+    for(unsigned int i = 0; i< numSensors; i++){
+      snprintf ( temp,1100,
+      "<iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/widgets/%d\"></iframe>\
+      ",
+       loadedConfig.channelID[0], loadedConfig.widgetID[0] + i
+      );
+  
+      server.sendContent(temp);    
 
-    server.sendContent(temp);
-
+      if(((i+1)%2)==0 && i!=0)  server.sendContent("<br>");    
+    }
+  
     snprintf ( temp,1100,
     "<h2>History graphs: </h2>\
       <form method='POST' action='res'>\
@@ -477,20 +483,18 @@ void handleSet1() {
 
     server.sendContent(temp);
 
-    snprintf ( temp,1100,
-    "<iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
-  <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe><br>\
-  <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
-  <iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
-  ", 
-      loadedConfig.channelID[0], 1, loadedConfig.readkey[0], resultNum, 1,
-      loadedConfig.channelID[0], 2, loadedConfig.readkey[0], resultNum, 2,
-      loadedConfig.channelID[0], 1, loadedConfig.readkey[0], resultNum, 1, 
-      loadedConfig.channelID[0], 2, loadedConfig.readkey[0], resultNum, 2
-    );
+    for(unsigned int i = 1; i<= numSensors; i++){
+      snprintf ( temp,1100,
+      "<iframe width=\"450\" height=\"260\" style=\"border: 1px solid #cccccc;\" src=\"https://api.thingspeak.com/channels/%d/charts/%d?bgcolor=%%23ffffff&color=%%23d62020&dynamic=true&api_key=%s&results=%s&title=Sensor+%d+Temperature&type=line&yaxis=%%C2%%B0C\"></iframe>\
+      ", 
+        loadedConfig.channelID[0], i, loadedConfig.readkey[0], resultNum, i
+      );
+  
+      server.sendContent(temp);
 
-    server.sendContent(temp);
-
+      if((i%2)==0 && i!=0)  server.sendContent("<br>");    
+    }
+    
     snprintf ( temp,1100,
     "<h2>Export</h2>\
       Download all of %s feeds in CSV format.\

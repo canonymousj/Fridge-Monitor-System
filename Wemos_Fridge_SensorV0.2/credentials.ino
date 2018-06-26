@@ -57,7 +57,7 @@ creds loadCreds(){
 
 
 void saveSensorConfig(){
-/*  EEPROM.begin(512);
+ EEPROM.begin(512);
   int eeAddress = sizeof(creds);
   
   sensorConfig customVar;
@@ -75,25 +75,25 @@ void saveSensorConfig(){
     
   for(unsigned int i = 0; i < 6; i++){
     
-    if(local_senSetName[i] != ""){
-      customVar.senSetName[i] = local_senSetName[i];
+    if(local_senSetName[i][0] != '\0'){
+      strcpy(customVar.senSetName[i], local_senSetName[i]);
     }else{
-      customVar.senSetName[i] = loadedConfig.senSetName[i];
+      strcpy(customVar.senSetName[i], loadedConfig.senSetName[i]);
     }
     if(local_channelID[i] != 0){
       customVar.channelID[i] = local_channelID[i];
     }else{
      customVar.channelID[i] =  loadedConfig.channelID[i];
     }
-    if(local_writekey[i] != ""){
-      customVar.writekey[i] = local_writekey[i];
+    if(local_writekey[i][0] != '\0'){
+      strcpy(customVar.writekey[i], local_writekey[i]);
     }else{
-      customVar.writekey[i] = loadedConfig.writekey[i];
+      strcpy(customVar.writekey[i], loadedConfig.writekey[i]);
     }
-    if(local_readkey[i] != ""){
-      customVar.readkey[i] = local_readkey[i];
+    if(local_readkey[i][0] != '\0'){
+      strcpy(customVar.readkey[i], local_readkey[i]);
     }else{
-      customVar.readkey[i] = loadedConfig.readkey[i];
+      strcpy(customVar.readkey[i], loadedConfig.readkey[i]);
     }
     if(local_widgetID[i] != 0){
       customVar.widgetID[i] = local_widgetID[i];
@@ -118,7 +118,7 @@ void saveSensorConfig(){
   
   EEPROM.commit();
   EEPROM.end();
-  Serial.print("Written custom data type!");*/
+  Serial.print("Written custom data type!");
 }
 
 sensorConfig loadSensorConfig(){

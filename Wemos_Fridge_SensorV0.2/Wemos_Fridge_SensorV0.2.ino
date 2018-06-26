@@ -7,7 +7,6 @@
  * 
  * Ideas to add: Predefined amount of sensors that get enabled through a config. Sensor enable, enables that sensors webpage with its histographics. Graphs only the avg - but could do all - similarily using the string method for webpage (have a string placeholder -> fill that string with the required info using loops.
  * 
- * Issues: RAM runs out on large webpage
  */
 #include <ThingSpeak.h>
 #include <ESP8266WiFi.h>
@@ -88,8 +87,6 @@ String authFailResponse = "Authentication Failed";  // the Content of the HTML r
 int authed = 0;
 
 //sensor variables
-unsigned int tempInterval = 300000; //update rate of all sensors
-
 float avgT[6] = {0};  //average temperature for each sensor set
 
 unsigned int local_numSen = 1;
@@ -126,25 +123,13 @@ IPAddress netMsk(255, 255, 255, 0);
 //Outgoing client object
 WiFiClient client;        // Initialize the Wifi client library. Object client (allows outgoing connection)
 
-void setup ( void ) {
-  loadedConfig.numSen = local_numSen;
-  loadedConfig.updateRate = local_updateRate;
-
-  for(unsigned int i = 0; i < 6; i++){
-    strcpy(loadedConfig.senSetName[i], local_senSetName[i]);
-    loadedConfig.channelID[i] = local_channelID[i];
-    strcpy(loadedConfig.readkey[i], local_readkey[i]);
-    strcpy(loadedConfig.writekey[i], local_writekey[i]);
-    loadedConfig.widgetID[i] = local_widgetID[i];
-  }
-  
+void setup ( void ) { 
   pinMode (initPin, INPUT_PULLUP);
     
   Serial.begin ( 115200 );
   
   int initState = digitalRead(initPin);
 
-  //sensorConfig lConfig = loadSensorConfig();
   //if pin to setup is pulled high (by PULLUP) it loads STA, else it becomes an AP
   if(initState){
     STA();
@@ -183,7 +168,7 @@ void loop ( void ) {
   }
 
   //check temp every tempInterval seconds
-  if((unsigned long)(curMillis-prevTempMillis)>tempInterval){
+  if((unsigned long)(curMillis-prevTempMillis)>loadedConfig.updateRate){
     prevTempMillis = curMillis;
     
     avgT[0] = 0;
